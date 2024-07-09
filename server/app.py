@@ -46,6 +46,42 @@ class PlantByID(Resource):
     def get(self, id):
         plant = Plant.query.filter_by(id=id).first().to_dict()
         return make_response(jsonify(plant), 200)
+    
+    def patch(self,id):
+        plant=Plant.query.filter(Plant.id == id).first()
+
+        if not plant:
+            return make_response({'message':"The method is not allowed for the requested URL."})
+
+        for attr in request.form:
+            setattr(plant,attr,request.form[attr])
+
+        db.session.add(plant)
+        db.session.commit()
+
+        plant_dict = plant.to_dict()
+
+        response_body={
+            **plant_dict,
+            'is_in_stock':False
+        }
+       
+
+        palt = make_response(jsonify(response_body),200)
+        return palt
+    
+    def delete(self,id):
+        plant=Plant.query.filter_by(id = id).first()
+        db.session.delete(plant)
+        db.session.commit()
+
+
+        response=make_response('',200)
+
+        return response
+
+
+
 
 
 api.add_resource(PlantByID, '/plants/<int:id>')
